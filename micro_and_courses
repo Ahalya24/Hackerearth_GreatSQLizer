@@ -1,0 +1,13 @@
+SELECT 
+stup.Student_ID,stup.Course_ID
+FROM (SELECT 
+stu.Student_ID,
+stu.Rank,
+pref.Course_ID,
+RANK() OVER (PARTITION BY pref.Course_ID ORDER BY stu.Rank) AS st_cr_rank
+FROM (SELECT * FROM Students  ORDER BY Rank) stu 
+LEFT JOIN Preferences pref 
+ON stu.Student_ID=pref.Student_ID) stup
+LEFT JOIN Courses cr
+ON stup.Course_ID=cr.Course_ID
+WHERE st_cr_rank<=CLimit;
