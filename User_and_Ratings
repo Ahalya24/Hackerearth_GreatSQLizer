@@ -1,11 +1,4 @@
-SELECT 
-a.Username, a.Ratings FROM
-(SELECT Username, Ratings 
+SELECT Username, Ratings 
 FROM Details
-WHERE Country NOT IN (SELECT Country FROM Details WHERE Level IN (4,7,9))) a
-LEFT OUTER JOIN 
-(SELECT * FROM Details 
-WHERE Level IN (4,7,9)) b
-ON a.Ratings>b.Ratings
-GROUP BY a.Username, a.Ratings
-ORDER BY a.Username;
+WHERE Country NOT IN (SELECT Country FROM Details WHERE Level IN (4,7,9))
+AND Ratings>(SELECT max(Ratings) FROM Details WHERE Level IN (4,7,9));
