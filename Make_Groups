@@ -1,12 +1,31 @@
-SELECT First, Last
+SELECT x.First,y.Last FROM
+(SELECT 
+row_number() OVER () AS Grp,
+RollNo AS First
 FROM (SELECT 
-CASE WHEN deci='first_row' THEN RollNo END AS First,
-CASE WHEN deci='last_row' THEN RollNo END AS Last
-FROM (SELECT b.*,
+RollNo, rr,
 CASE WHEN (mod(rr_rank,3)=0) THEN 'last_row' 
 WHEN (mod((lead(rr_rank,2) OVER ()),3)=0) THEN 'first_row' END AS deci
-FROM (SELECT RollNo, rr,
+FROM (SELECT 
+RollNo, rr,
 rank() over (order by rr asc) as rr_rank
-FROM (SELECT  RollNo , Rank AS rr FROM Students) a) b) c
-WHERE deci IS NOT NULL) d
-GROUP BY First,Last;
+FROM (SELECT  
+RollNo , Rank AS rr FROM Students) a) b) c
+WHERE deci='first_row' )x
+LEFT JOIN 
+(SELECT 
+row_number() OVER () AS Grp,
+RollNo AS Last
+FROM (SELECT 
+RollNo, rr,
+CASE WHEN (mod(rr_rank,3)=0) THEN 'last_row' 
+WHEN (mod((lead(rr_rank,2) OVER ()),3)=0) THEN 'first_row' END AS deci
+FROM (SELECT 
+RollNo, rr,
+rank() over (order by rr asc) as rr_rank
+FROM (SELECT  
+RollNo , Rank AS rr FROM Students) a) b) c
+WHERE deci='last_row' )y
+ON x.grp=y.grp
+GROUP BY x.grp,x.First,y.Last
+ORDER BY x.grp;
