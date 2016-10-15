@@ -1,0 +1,17 @@
+SELECT 
+Event_Name , 
+deci,
+string_agg(Student_Name,',') AS list FROM
+(SELECT Event_Name,
+Student_Name,
+CASE WHEN r_asc IN (1,2) THEN 'First_Two' 
+WHEN r_desc IN (1,2) THEN 'Last_Two'
+ELSE 'none'
+END AS deci
+FROM (SELECT Event_name,Student_Name,
+rank() OVER (PARTITION BY Event_name ORDER BY Student_Name) AS r_asc,
+rank() OVER (PARTITION BY Event_name ORDER BY Student_Name DESC) AS r_desc
+FROM (SELECT Event_Name,
+COALESCE (Student_Name,'M.James') AS Student_Name
+FROM Events) a) x) y
+GROUP BY Event_Name, deci ;
