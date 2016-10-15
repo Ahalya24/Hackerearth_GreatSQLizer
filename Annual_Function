@@ -1,11 +1,16 @@
-SELECT 
+SELECT f.Event_Name, max(First_Two) AS First_Two, 
+max(Last_Two) AS Last_Two
+FROM (SELECT
+m.Event_Name, CASE WHEN m.deci='ft' THEN m.list END AS First_Two,
+CASE WHEN m.deci='lt' THEN m.list END AS Last_Two
+FROM (SELECT 
 Event_Name , 
 deci,
 string_agg(Student_Name,',') AS list FROM
 (SELECT Event_Name,
 Student_Name,
-CASE WHEN r_asc IN (1,2) THEN 'First_Two' 
-WHEN r_desc IN (1,2) THEN 'Last_Two'
+CASE WHEN r_asc IN (1,2) THEN 'ft'
+WHEN r_desc IN (1,2) THEN 'lt'
 ELSE 'none'
 END AS deci
 FROM (SELECT Event_name,Student_Name,
@@ -13,5 +18,6 @@ rank() OVER (PARTITION BY Event_name ORDER BY Student_Name) AS r_asc,
 rank() OVER (PARTITION BY Event_name ORDER BY Student_Name DESC) AS r_desc
 FROM (SELECT Event_Name,
 COALESCE (Student_Name,'M.James') AS Student_Name
-FROM Events) a) x) y
-GROUP BY Event_Name, deci ;
+FROM Events) a) x ORDER BY Student_Name) y
+GROUP BY Event_Name, deci ) m) f
+GROUP BY f.Event_Name ORDER BY Event_Name;
